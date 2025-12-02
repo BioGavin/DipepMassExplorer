@@ -69,7 +69,7 @@ function App() {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-science-500 focus:border-science-500 sm:text-sm transition-colors"
-              placeholder="Search AA name, code (Ala, A), or mass..."
+              placeholder="Search (e.g. 'Ala', 'A', '188.12')"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

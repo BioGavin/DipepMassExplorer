@@ -43,20 +43,48 @@ const MassMatrix: React.FC<MassMatrixProps> = ({ type, selectedId, onSelect, sea
     return matrix;
   }, []);
 
-  // Filter highlighting logic
+  // Optimized Filter Logic
   const isMatch = (data: DipeptideData) => {
     if (!searchTerm) return false;
-    const term = searchTerm.toLowerCase();
-    return (
+    const term = searchTerm.toLowerCase().trim();
+    
+    // 1. Text Search (Names, Codes) - Global search regardless of type
+    const textMatch = 
       data.aa1.name.toLowerCase().includes(term) || 
       data.aa2.name.toLowerCase().includes(term) ||
       data.aa1.threeLetter.toLowerCase().includes(term) ||
       data.aa2.threeLetter.toLowerCase().includes(term) ||
       data.aa1.oneLetter.toLowerCase() === term ||
-      data.aa2.oneLetter.toLowerCase() === term ||
-      data.linearMass.toString().includes(term) ||
-      data.cyclicMass.toString().includes(term)
-    );
+      data.aa2.oneLetter.toLowerCase() === term;
+
+    if (textMatch) return true;
+
+    // 2. Numeric/Mass Search
+    // ONLY search the mass type currently being displayed (linear vs cyclic)
+    const activeMass = type === 'linear' ? data.linearMass : data.cyclicMass;
+    
+    // Check if the term is a number
+    const searchNum = parseFloat(term);
+    const isNumericSearch = !isNaN(searchNum);
+
+    if (isNumericSearch) {
+      // A. Smart Range Match (+/- 0.05 Da)
+      // Allows searching "188.1" to find "188.12"
+      if (Math.abs(activeMass - searchNum) <= 0.05) {
+        return true;
+      }
+
+      // B. Prefix Match Only
+      // Converts mass to string (e.g. "203.1270") and checks if it STARTS with the term.
+      // This allows: searching "203" -> finds "203.1270"
+      // This prevents: searching "270" -> finding "203.1270" (Fix for the bug)
+      const massStr = activeMass.toFixed(4);
+      if (massStr.startsWith(term)) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   return (
@@ -105,7 +133,7 @@ const MassMatrix: React.FC<MassMatrixProps> = ({ type, selectedId, onSelect, sea
                         p-2 text-center text-xs cursor-pointer transition-all duration-150 border-r border-b border-gray-100 last:border-r-0
                         ${active ? 'bg-science-600 text-white shadow-inner scale-105 font-bold z-0' : 'hover:bg-science-50 text-gray-600'}
                         ${dimmed ? 'opacity-30' : 'opacity-100'}
-                        ${matched && !active ? 'bg-yellow-100 ring-2 ring-yellow-400' : ''}
+                        ${matched && !active ? 'bg-yellow-100 ring-2 ring-yellow-400 font-medium text-yellow-900' : ''}
                       `}
                     >
                       {mass.toFixed(2)}
