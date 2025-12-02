@@ -1,0 +1,5 @@
+{
+  "name": "Dipeptide Mass Explorer",
+  "description": "A precision tool for calculating and exploring the molecular masses of linear and cyclic dipeptides formed by the 20 natural amino acids, featuring AI-powered chemical insights.",
+  "requestFramePermissions": []
+}
